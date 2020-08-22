@@ -298,7 +298,7 @@ class _MyAppState extends State<MyApp> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                      "Solution Volume (ml): \t\t${_patient.aminoAcidSolution[index].toStringAsFixed(1)}"),
+                      "Solutihttps://jennscalculator.web.apphttps://jennscalculator.web.appon Volume (ml): \t\t${_patient.aminoAcidSolution[index].toStringAsFixed(1)}"),
                   Text(
                       "Rounded Rate (ml/hour): \t  ${_patient.hourlyRate[index].toStringAsFixed(1)}"),
                   Text(
