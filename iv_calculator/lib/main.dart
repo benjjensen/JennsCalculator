@@ -1,3 +1,7 @@
+/* https://blog.solutelabs.com/flutter-for-web-how-to-deploy-a-flutter-web-app-c7d9db7ced2e
+ Above was used for deploying to web. Note that for Part 2, step 2, you must remember to
+ "git push origin gh-pages */
+
 import 'package:flutter/material.dart';
 import 'Patient.dart';
 import "Parameters.dart";
@@ -26,7 +30,7 @@ class _MyAppState extends State<MyApp> {
       ),
       home: Scaffold(
         appBar: AppBar(
-          title: Text("Jenn's Thing"),
+          title: Text("Jenn's Thing v0.1"),
           centerTitle: true,
         ),
         backgroundColor: Colors.white,
