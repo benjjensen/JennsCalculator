@@ -1,6 +1,17 @@
 /* https://blog.solutelabs.com/flutter-for-web-how-to-deploy-a-flutter-web-app-c7d9db7ced2e
  Above was used for deploying to web. Note that for Part 2, step 2, you must remember to
- "git push origin gh-pages */
+ "git push origin gh-pages
+
+ Pushing changes:
+    1) Push to github
+    2) On Firebase CLI thing:
+      a) flutter build web
+      b) flutter pub global run peanut:peanut
+      c) git push origin gh-pages
+    3) Wait like 2-3 min
+
+    (C:\Users\benjj\Downloads\firebase-tools-instant-win.exe)
+ */
 
 import 'package:flutter/material.dart';
 import 'Patient.dart';
@@ -34,14 +45,19 @@ class _MyAppState extends State<MyApp> {
           centerTitle: true,
         ),
         backgroundColor: Colors.white,
-        body: Column(
-          children: getBody(),
+        body: ListView(
+          children: [
+            Column(
+              children: getBody(),
+            ),
+          ],
         ),
       ),
     );
   }
 
   Widget getWeight() {
+    // Entry form for gathering data from user
     Widget playerForm = TextFormField(
       decoration: const InputDecoration(
         hintText: 'Enter patient weight',
@@ -273,12 +289,19 @@ class _MyAppState extends State<MyApp> {
         ),
       );
 
-      body.add(getTableTile(0));
+      // Add in amino acid (AA) concentrations
+      for (int i = 0; i < aminoAcidConcentrations.length; i++) {
+        body.add(getTableTile(i));
+      }
     }
     return body;
   }
 
   Widget getTableTile(int index) {
+    /*
+        Used to display the updated volume, protein, and calories
+      for each amino acid concentration
+    */
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Card(
@@ -302,7 +325,7 @@ class _MyAppState extends State<MyApp> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                      "Solutihttps://jennscalculator.web.apphttps://jennscalculator.web.appon Volume (ml): \t\t${_patient.aminoAcidSolution[index].toStringAsFixed(1)}"),
+                      "Solution Volume (ml): \t\t${_patient.aminoAcidSolution[index].toStringAsFixed(1)}"),
                   Text(
                       "Rounded Rate (ml/hour): \t  ${_patient.hourlyRate[index].toStringAsFixed(1)}"),
                   Text(
