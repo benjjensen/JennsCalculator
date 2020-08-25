@@ -34,6 +34,7 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
+    print("Building line 38");
     return MaterialApp(
       // Title, Theme, Home:
       theme: ThemeData(
@@ -41,7 +42,7 @@ class _MyAppState extends State<MyApp> {
       ),
       home: Scaffold(
         appBar: AppBar(
-          title: Text("Jenn's Thing v0.1"),
+          title: Text("Jenn's Thing v0.2"),
           centerTitle: true,
         ),
         backgroundColor: Colors.white,
@@ -194,7 +195,7 @@ class _MyAppState extends State<MyApp> {
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
                   ListTile(
-                    title: Text("Section 3",
+                    title: Text("Section 3 (likely will be cut out)",
                         style: TextStyle(
                           fontSize: 24,
                         )),
@@ -233,20 +234,21 @@ class _MyAppState extends State<MyApp> {
                           ),
                         ),
                         Text(
-                          "Updated Calories (kcal/day)",
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Text(
                           "Updated Protein (g/day)",
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
+                        Text(
+                          "Updated Calories (kcal/day)",
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ]),
+                      // TODO Make this a for loop in case more than 3
                       TableRow(children: [
                         Text("${aminoAcidConcentrations[0]}"),
                         Text(
@@ -254,9 +256,9 @@ class _MyAppState extends State<MyApp> {
                         Text("${_patient.hourlyRate[0].toStringAsFixed(1)}"),
                         Text("${_patient.updatedVolume[0].toStringAsFixed(1)}"),
                         Text(
-                            "${_patient.updatedCalories[0].toStringAsFixed(1)}"),
-                        Text(
                             "${_patient.updatedProtein[0].toStringAsFixed(1)}"),
+                        Text(
+                            "${_patient.updatedCalories[0].toStringAsFixed(1)}"),
                       ]),
                       TableRow(children: [
                         Text("${aminoAcidConcentrations[1]}"),
@@ -265,9 +267,9 @@ class _MyAppState extends State<MyApp> {
                         Text("${_patient.hourlyRate[1].toStringAsFixed(1)}"),
                         Text("${_patient.updatedVolume[1].toStringAsFixed(1)}"),
                         Text(
-                            "${_patient.updatedCalories[1].toStringAsFixed(1)}"),
-                        Text(
                             "${_patient.updatedProtein[1].toStringAsFixed(1)}"),
+                        Text(
+                            "${_patient.updatedCalories[1].toStringAsFixed(1)}"),
                       ]),
                       TableRow(children: [
                         Text("${aminoAcidConcentrations[2]}"),
@@ -276,9 +278,9 @@ class _MyAppState extends State<MyApp> {
                         Text("${_patient.hourlyRate[2].toStringAsFixed(1)}"),
                         Text("${_patient.updatedVolume[2].toStringAsFixed(1)}"),
                         Text(
-                            "${_patient.updatedCalories[2].toStringAsFixed(1)}"),
-                        Text(
                             "${_patient.updatedProtein[2].toStringAsFixed(1)}"),
+                        Text(
+                            "${_patient.updatedCalories[2].toStringAsFixed(1)}"),
                       ]),
                     ]),
                   )
@@ -297,11 +299,46 @@ class _MyAppState extends State<MyApp> {
     return body;
   }
 
+  Center getTableTileRowHeader(String headerText1, String headerText2) {
+    return Center(
+      child: Column(
+        children: [
+          Text(
+            headerText1,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+//          decoration: TextDecoration.underline,
+            ),
+          ),
+          Text(
+            headerText2,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+//          decoration: TextDecoration.underline,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Center getTableTileRowEntry(String entryText) {
+    return Center(
+        child: Text(entryText,
+            style: TextStyle(
+              fontSize: 12,
+              fontStyle: FontStyle.italic,
+            )));
+  }
+
   Widget getTableTile(int index) {
     /*
         Used to display the updated volume, protein, and calories
       for each amino acid concentration
     */
+    // TODO Make collapsible?
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Card(
@@ -312,28 +349,106 @@ class _MyAppState extends State<MyApp> {
           children: [
             ListTile(
               title: Text(
-                  "AA Concentration: ${_patient.aminoAcidSolution[index].toStringAsFixed(1)}",
+                  "AA Concentration: ${aminoAcidConcentrations[index].toStringAsFixed(3)}",
                   style: TextStyle(
                     // TODO: Make uniform via function
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                   )),
             ),
+
+            // Table containing update volume, calories, protein, etc...
             Padding(
-              padding: const EdgeInsets.fromLTRB(32.0, 0.0, 0.0, 0.0),
+              padding: const EdgeInsets.fromLTRB(32.0, 0.0, 0.0, 10.0),
+              // https://medium.com/flutter-community/table-in-flutter-beyond-the-basics-8d31b022b451
+              child: Table(
+                /*
+                border: TableBorder(
+                  top: BorderSide(
+                    color: Colors.blueGrey,
+                    width: 2,
+                  ),
+                  bottom: BorderSide(
+                    color: Colors.blueGrey,
+                    width: 2,
+                  ),
+                  left: BorderSide(
+                    color: Colors.blueGrey,
+                    width: 2,
+                  ),
+                  right: BorderSide(
+                    color: Colors.blueGrey,
+                    width: 2,
+                  ),
+                ),
+                */ // Table Border
+                children: [
+                  TableRow(
+                    children: [
+                      getTableTileRowHeader("Solution Volume", "(ml)"),
+                      getTableTileRowHeader("Rounded Rate", "(ml/hour)"),
+                      getTableTileRowHeader("Updated Volume", "(/day?)"),
+                      getTableTileRowHeader('Protein', '(g/day)'),
+                      getTableTileRowHeader("Updated Calories", "kcal/day)"),
+                    ],
+                  ),
+                  TableRow(
+                    children: [
+                      getTableTileRowEntry(
+                          "${_patient.aminoAcidSolution[index].toStringAsFixed(1)}"),
+                      getTableTileRowEntry(
+                          "${_patient.hourlyRate[index].toStringAsFixed(1)}"),
+                      getTableTileRowEntry(
+                          "${_patient.updatedVolume[index].toStringAsFixed(1)}"),
+                      getTableTileRowEntry(
+                          "${_patient.updatedProtein[index].toStringAsFixed(1)}"),
+                      getTableTileRowEntry(
+                          "${_patient.updatedCalories[index].toStringAsFixed(1)}"),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(32.0, 0.0, 0.0, 10.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                      "Solution Volume (ml): \t\t${_patient.aminoAcidSolution[index].toStringAsFixed(1)}"),
+                    "Lipids",
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  // TODO make a for loop? Is this ever gonna be more than 3...?
+                  Text(//TODO use a RichText to bold the value?
+                      "\t${lipidVolume[0]}ml @${lipidConcentrations[0] * 100}% ILE: \t${_patient.calRemaining[index][0].toStringAsFixed(1)} kcal remaining for PN"),
                   Text(
-                      "Rounded Rate (ml/hour): \t  ${_patient.hourlyRate[index].toStringAsFixed(1)}"),
+                      "\t${lipidVolume[1]}ml @${lipidConcentrations[1] * 100}%* ILE: \t${_patient.calRemaining[index][1].toStringAsFixed(1)} kcal remaining for PN"),
                   Text(
-                      "Updated Volume (/day?): \t${_patient.updatedVolume[index].toStringAsFixed(1)}"),
+                      "\t${lipidVolume[2]}ml @${lipidConcentrations[2] * 100}%* ILE: \t${_patient.calRemaining[index][2].toStringAsFixed(1)} kcal remaining for PN"),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(32.0, 0.0, 0.0, 10.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                   Text(
-                      "Updated Calories (kcal/day): \t${_patient.updatedCalories[index].toStringAsFixed(1)}"),
+                    "CHO",
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                   Text(
-                      "Updated Protein (g/day): \t${_patient.updatedProtein[index].toStringAsFixed(1)}"),
+                      "\t${dwConcn[0] * 100}% Concn: ${_patient.dextroseProvided[index][0].toStringAsFixed(1)} kcal/day from CHO"),
+                  Text(
+                      "\t${dwConcn[1] * 100}% Concn: ${_patient.dextroseProvided[index][1].toStringAsFixed(1)} kcal/day from CHO"),
+                  Text(
+                      "\t${dwConcn[2] * 100}% Concn: ${_patient.dextroseProvided[index][2].toStringAsFixed(1)} kcal/day from CHO"),
+                  Text(
+                      "\t${dwConcn[3] * 100}% Concn: ${_patient.dextroseProvided[index][3].toStringAsFixed(1)} kcal/day from CHO"),
                 ],
               ),
             ),

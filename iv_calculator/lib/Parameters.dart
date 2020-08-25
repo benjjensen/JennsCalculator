@@ -18,3 +18,11 @@ var rateOfGiving =
 var portionRounding = 5.0; // What we round the dose to, in ml
 
 var caloriesPerProtein = 4.0;
+
+// LIPIDS
+List<double> lipidConcentrations = [0.2, 0.11, 0.11]; // kcals / mL
+List<double> lipidVolume = [250, 250, 500]; // in mL
+
+// CHO
+List<double> dwConcn = [0.1, 0.15, 0.2, 0.25]; // D%W concentrations, g/ml ?
+double kcalsPerGSugar = 3.4; // kcal / g CHO
