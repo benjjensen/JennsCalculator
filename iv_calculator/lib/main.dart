@@ -13,6 +13,11 @@
     (C:\Users\benjj\Downloads\firebase-tools-instant-win.exe)
  */
 
+/* Long Term TODO:
+  - Add in the non-parenteral
+  - Allow input of which lipids/CHO concn are available and cross out others
+ */
+
 import 'package:flutter/material.dart';
 import 'Patient.dart';
 import "Parameters.dart";
@@ -42,7 +47,7 @@ class _MyAppState extends State<MyApp> {
       ),
       home: Scaffold(
         appBar: AppBar(
-          title: Text("Jenn's Thing v0.2"),
+          title: Text("Jenn's Thing v0.3"),
           centerTitle: true,
         ),
         backgroundColor: Colors.white,
@@ -326,11 +331,106 @@ class _MyAppState extends State<MyApp> {
 
   Center getTableTileRowEntry(String entryText) {
     return Center(
-        child: Text(entryText,
-            style: TextStyle(
-              fontSize: 12,
-              fontStyle: FontStyle.italic,
-            )));
+        child: Padding(
+      padding: const EdgeInsets.fromLTRB(0.0, 4.0, 0.0, 4.0),
+      child: Text(entryText,
+          style: TextStyle(
+            fontSize: 12,
+            fontStyle: FontStyle.italic,
+          )),
+    ));
+  }
+
+  Center getTableTileRowEntry_colored(String entryText) {
+    var valueColor;
+    double value = double.parse(entryText);
+    if (value < (_patient.caloricNeeds_max) &&
+        value > (_patient.caloricNeeds_min)) {
+      valueColor = Colors.green;
+    } else {
+      valueColor = Colors.red;
+    }
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(0.0, 4.0, 0.0, 4.0),
+        child: Text(
+          entryText,
+          style: TextStyle(
+            fontSize: 12,
+            fontStyle: FontStyle.italic,
+            color: valueColor,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Padding getUpdatedCalTable(int index) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(32.0, 0.0, 0.0, 10.0),
+      child: Table(
+        children: [
+          TableRow(
+            children: [
+              //TODO dont hardcode numbers
+              getTableTileRowHeader(" ", " "),
+              getTableTileRowHeader("250ml @20%", "(Lipids)"),
+              getTableTileRowHeader("250ml @11%", "(Lipids)"),
+              getTableTileRowHeader("500ml @11%", "(Lipids)"),
+            ],
+          ),
+          TableRow(
+            children: [
+              //TODO dont hardcode numbers
+              getTableTileRowHeader("10% Concn", "(CHO)"),
+              getTableTileRowEntry_colored(
+                  "${_patient.newCalVals[index][0][0].toStringAsFixed(1)}"),
+              getTableTileRowEntry_colored(
+                  "${_patient.newCalVals[index][1][0].toStringAsFixed(1)}"),
+              getTableTileRowEntry_colored(
+                  "${_patient.newCalVals[index][2][0].toStringAsFixed(1)}"),
+            ],
+          ),
+          TableRow(
+            children: [
+              //TODO dont hardcode numbers
+              getTableTileRowHeader("15% Concn", "(CHO)"),
+              getTableTileRowEntry_colored(
+                  "${_patient.newCalVals[index][0][1].toStringAsFixed(1)}"),
+              getTableTileRowEntry_colored(
+                  "${_patient.newCalVals[index][1][1].toStringAsFixed(1)}"),
+              getTableTileRowEntry_colored(
+                  "${_patient.newCalVals[index][2][1].toStringAsFixed(1)}"),
+            ],
+          ),
+          TableRow(
+            children: [
+              //TODO dont hardcode numbers
+              getTableTileRowHeader("20% Concn", "(CHO)"),
+              getTableTileRowEntry_colored(
+                  "${_patient.newCalVals[index][0][2].toStringAsFixed(1)}"),
+              getTableTileRowEntry_colored(
+                  "${_patient.newCalVals[index][1][2].toStringAsFixed(1)}"),
+              getTableTileRowEntry_colored(
+                  "${_patient.newCalVals[index][2][2].toStringAsFixed(1)}"),
+            ],
+          ),
+          TableRow(
+            children: [
+              //TODO dont hardcode numbers
+              getTableTileRowHeader("25% Concn", "(CHO)"),
+              getTableTileRowEntry_colored(
+                  "${_patient.newCalVals[index][0][3].toStringAsFixed(1)}"),
+              getTableTileRowEntry_colored(
+                  "${_patient.newCalVals[index][1][3].toStringAsFixed(1)}"),
+              getTableTileRowEntry_colored(
+                  "${_patient.newCalVals[index][2][3].toStringAsFixed(1)}"),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 
   Widget getTableTile(int index) {
@@ -452,6 +552,14 @@ class _MyAppState extends State<MyApp> {
                 ],
               ),
             ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(32.0, 0.0, 0.0, 0.0),
+              child: Text(
+                "Updated Calorie Counts:",
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ),
+            getUpdatedCalTable(index),
           ],
         ),
       ),

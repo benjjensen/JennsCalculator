@@ -32,6 +32,14 @@ class Patient {
       aminoAcidConcentrations.length, (i) => List(dwConcn.length),
       growable: false);
 
+  // Recalculating kcals
+  //    #AA Concn x #Lipid Volume x #CHO Concn
+  var newCalVals = List.generate(
+      aminoAcidConcentrations.length,
+      (i) => List.generate(lipidVolume.length, (j) => List(dwConcn.length),
+          growable: false),
+      growable: false);
+
   void calculateNutrientNeeds() {
     caloricNeeds_min = caloriesPerKg_lower * patientWeight; // in kcal/day
     caloricNeeds_max = caloriesPerKg_upper * patientWeight;
@@ -95,6 +103,22 @@ class Patient {
     }
   }
 
+  void sumUpNewCalCount() {
+    for (int aa = 0; aa < aminoAcidConcentrations.length; aa++) {
+      for (int lipVol = 0; lipVol < lipidVolume.length; lipVol++) {
+        for (int dwCon = 0; dwCon < dwConcn.length; dwCon++) {
+          newCalVals[aa][lipVol][dwCon] = updatedCalories[aa] +
+              calFromLipids[lipVol] +
+              dextroseProvided[aa][dwCon];
+        }
+      }
+    }
+  }
+
+  void nutrientPercentage() {
+    // TODO is this divided by the average or the actual?
+  }
+
   void doItAll() {
     print("Doin it all");
     aminoAcidSolution.clear();
@@ -108,6 +132,7 @@ class Patient {
     determineHourlyRate();
     determineLipids();
     determineCHO();
+    sumUpNewCalCount();
   }
 
   void setPatientWeight(String weight) {
