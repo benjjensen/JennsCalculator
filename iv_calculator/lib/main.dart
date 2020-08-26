@@ -39,7 +39,6 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    print("Building line 38");
     return MaterialApp(
       // Title, Theme, Home:
       theme: ThemeData(
@@ -47,7 +46,7 @@ class _MyAppState extends State<MyApp> {
       ),
       home: Scaffold(
         appBar: AppBar(
-          title: Text("Jenn's Thing v0.3"),
+          title: Text("Jenn's Thing v1.0"),
           centerTitle: true,
         ),
         backgroundColor: Colors.white,
@@ -341,9 +340,36 @@ class _MyAppState extends State<MyApp> {
     ));
   }
 
-  Center getTableTileRowEntry_colored(String entryText) {
+//  Center getTableTileRowEntry_colored(String entryText) {
+//    //(int aaIdx, int lipIdx, int dwIdx) {
+//    var valueColor;
+//    double value = double.parse(entryText);
+//    if (value < (_patient.caloricNeeds_max) &&
+//        value > (_patient.caloricNeeds_min)) {
+//      valueColor = Colors.green;
+//    } else {
+//      valueColor = Colors.red;
+//    }
+//
+//    return Center(
+//      child: Padding(
+//        padding: const EdgeInsets.fromLTRB(0.0, 4.0, 0.0, 4.0),
+//        child: Text(
+//          entryText,
+//          style: TextStyle(
+//            fontSize: 12,
+//            fontStyle: FontStyle.italic,
+//            color: valueColor,
+//          ),
+//        ),
+//      ),
+//    );
+//  }
+
+  Center getTableTileRowEntry_colored(int aaIdx, int lipIdx, int dwIdx) {
+    // TODO add color to each percentage as well
     var valueColor;
-    double value = double.parse(entryText);
+    double value = _patient.newCalVals[aaIdx][lipIdx][dwIdx];
     if (value < (_patient.caloricNeeds_max) &&
         value > (_patient.caloricNeeds_min)) {
       valueColor = Colors.green;
@@ -351,16 +377,47 @@ class _MyAppState extends State<MyApp> {
       valueColor = Colors.red;
     }
 
+    List<double> breakdown = _patient.nutrientPercentage(aaIdx, lipIdx, dwIdx);
+
     return Center(
+      //TODO see if you can make units display when hovering
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(0.0, 4.0, 0.0, 4.0),
-        child: Text(
-          entryText,
-          style: TextStyle(
-            fontSize: 12,
-            fontStyle: FontStyle.italic,
-            color: valueColor,
-          ),
+        padding: const EdgeInsets.fromLTRB(0.0, 6.0, 0.0, 6.0),
+        child: Column(
+          children: [
+            Text(
+              "${value.toStringAsFixed(1)}",
+              style: TextStyle(
+                fontSize: 12,
+                fontStyle: FontStyle.italic,
+                color: valueColor,
+              ),
+            ),
+            Text(
+              "(${(100 * breakdown[0]).toStringAsFixed(1)}%, ${(100 * breakdown[1]).toStringAsFixed(1)}%, ${(100 * breakdown[2]).toStringAsFixed(1)}%)",
+              style: TextStyle(
+                fontSize: 12,
+                fontStyle: FontStyle.italic,
+                color: valueColor,
+              ),
+            ),
+            Text(
+              "${_patient.getInfusionRate(aaIdx, lipIdx, dwIdx).toStringAsFixed(1)} mg/kg/min",
+              style: TextStyle(
+                fontSize: 12,
+                fontStyle: FontStyle.italic,
+                color: valueColor,
+              ),
+            ),
+            Text(
+              "${_patient.getLipidRatio(aaIdx, lipIdx, dwIdx).toStringAsFixed(1)} g/kg/day",
+              style: TextStyle(
+                fontSize: 12,
+                fontStyle: FontStyle.italic,
+                color: valueColor,
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -384,48 +441,36 @@ class _MyAppState extends State<MyApp> {
             children: [
               //TODO dont hardcode numbers
               getTableTileRowHeader("10% Concn", "(CHO)"),
-              getTableTileRowEntry_colored(
-                  "${_patient.newCalVals[index][0][0].toStringAsFixed(1)}"),
-              getTableTileRowEntry_colored(
-                  "${_patient.newCalVals[index][1][0].toStringAsFixed(1)}"),
-              getTableTileRowEntry_colored(
-                  "${_patient.newCalVals[index][2][0].toStringAsFixed(1)}"),
+              getTableTileRowEntry_colored(index, 0, 0),
+              getTableTileRowEntry_colored(index, 1, 0),
+              getTableTileRowEntry_colored(index, 2, 0),
             ],
           ),
           TableRow(
             children: [
               //TODO dont hardcode numbers
               getTableTileRowHeader("15% Concn", "(CHO)"),
-              getTableTileRowEntry_colored(
-                  "${_patient.newCalVals[index][0][1].toStringAsFixed(1)}"),
-              getTableTileRowEntry_colored(
-                  "${_patient.newCalVals[index][1][1].toStringAsFixed(1)}"),
-              getTableTileRowEntry_colored(
-                  "${_patient.newCalVals[index][2][1].toStringAsFixed(1)}"),
+              getTableTileRowEntry_colored(index, 0, 1),
+              getTableTileRowEntry_colored(index, 1, 1),
+              getTableTileRowEntry_colored(index, 2, 1),
             ],
           ),
           TableRow(
             children: [
               //TODO dont hardcode numbers
               getTableTileRowHeader("20% Concn", "(CHO)"),
-              getTableTileRowEntry_colored(
-                  "${_patient.newCalVals[index][0][2].toStringAsFixed(1)}"),
-              getTableTileRowEntry_colored(
-                  "${_patient.newCalVals[index][1][2].toStringAsFixed(1)}"),
-              getTableTileRowEntry_colored(
-                  "${_patient.newCalVals[index][2][2].toStringAsFixed(1)}"),
+              getTableTileRowEntry_colored(index, 0, 2),
+              getTableTileRowEntry_colored(index, 1, 2),
+              getTableTileRowEntry_colored(index, 2, 2),
             ],
           ),
           TableRow(
             children: [
               //TODO dont hardcode numbers
               getTableTileRowHeader("25% Concn", "(CHO)"),
-              getTableTileRowEntry_colored(
-                  "${_patient.newCalVals[index][0][3].toStringAsFixed(1)}"),
-              getTableTileRowEntry_colored(
-                  "${_patient.newCalVals[index][1][3].toStringAsFixed(1)}"),
-              getTableTileRowEntry_colored(
-                  "${_patient.newCalVals[index][2][3].toStringAsFixed(1)}"),
+              getTableTileRowEntry_colored(index, 0, 3),
+              getTableTileRowEntry_colored(index, 1, 3),
+              getTableTileRowEntry_colored(index, 2, 3),
             ],
           ),
         ],
@@ -555,7 +600,7 @@ class _MyAppState extends State<MyApp> {
             Padding(
               padding: const EdgeInsets.fromLTRB(32.0, 0.0, 0.0, 0.0),
               child: Text(
-                "Updated Calorie Counts:",
+                "Updated Calorie Counts (P%,L%,C%):",
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
             ),

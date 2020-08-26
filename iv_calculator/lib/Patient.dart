@@ -85,7 +85,7 @@ class Patient {
     for (int i = 0; i < lipidVolume.length; i++) {
       calFromLipids.add(lipidVolume[i] *
           lipidConcentrations[i] *
-          10.0); // x10 to account for concentration conversion
+          10.0); // x10 to convert from g to calories (?)
     }
     for (int j = 0; j < aminoAcidConcentrations.length; j++) {
       for (int i = 0; i < lipidVolume.length; i++) {
@@ -115,8 +115,39 @@ class Patient {
     }
   }
 
-  void nutrientPercentage() {
+  List<double> nutrientPercentage(int aa, int lipVol, int dwCon) {
+    /*  Returns the contribution of protein, lipids, and dextrose to overall
+       calorie count, by percentage (in that order)
+     */
     // TODO is this divided by the average or the actual?
+    double percentCalFromProtein =
+        updatedCalories[aa] / newCalVals[aa][lipVol][dwCon];
+    double percentCalFromLipids =
+        calFromLipids[lipVol] / newCalVals[aa][lipVol][dwCon];
+    double percentCalFromCHO =
+        dextroseProvided[aa][dwCon] / newCalVals[aa][lipVol][dwCon];
+
+    List<double> calorieBreakdown = [];
+    calorieBreakdown.add(percentCalFromProtein);
+    calorieBreakdown.add(percentCalFromLipids);
+    calorieBreakdown.add(percentCalFromCHO);
+
+    return calorieBreakdown;
+  }
+
+  double getInfusionRate(int aaIdx, int lipIdx, int dwIdx) {
+    double gramsCHO = dextroseProvided[aaIdx][dwIdx] /
+        kcalsPerGSugar; // Convert from calories back to grams CHO
+    double infusionRate = gramsCHO *
+        1000.0 /
+        (patientWeight *
+            1440.0); // grams -> mg, divided by weight, divided by minutes
+    return infusionRate; // in mg/kg/min
+  }
+
+  double getLipidRatio(int aaIdx, int lipIdx, int dwIdx) {
+    double gramsLipid = calFromLipids[lipIdx] / 10.0;
+    return (gramsLipid / patientWeight); // g/kg/day (less than 1)
   }
 
   void doItAll() {
