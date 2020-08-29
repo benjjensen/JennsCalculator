@@ -22,12 +22,9 @@ import 'package:flutter/material.dart';
 import 'Patient.dart';
 import "Parameters.dart";
 
-void main() {
-  runApp(MyApp());
-}
+void main() => runApp(MyApp());
 
 class MyApp extends StatefulWidget {
-  /* Main body of website*/
   @override
   _MyAppState createState() => _MyAppState();
 }
@@ -40,20 +37,20 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      // Title, Theme, Home:
       theme: ThemeData(
-        primaryColor: Colors.blueGrey[400],
+        primaryColor: Colors.blueAccent,
       ),
       home: Scaffold(
         appBar: AppBar(
-          title: Text("Jenn's Thing v1.0"),
+          title: Text("Jenn's Thing v1.1"),
           centerTitle: true,
         ),
         backgroundColor: Colors.white,
         body: ListView(
           children: [
             Column(
-              children: getBody(),
+              children:
+                  getBody(), // Entry form, start button, and cards when relevant
             ),
           ],
         ),
@@ -62,7 +59,9 @@ class _MyAppState extends State<MyApp> {
   }
 
   Widget getWeight() {
-    // Entry form for gathering data from user
+    /*
+      Entry form for gathering data from user (patient's weight)
+    */
     Widget playerForm = TextFormField(
       decoration: const InputDecoration(
         hintText: 'Enter patient weight',
@@ -70,15 +69,17 @@ class _MyAppState extends State<MyApp> {
           borderSide: BorderSide(color: Colors.blueAccent),
         ),
         hintStyle: TextStyle(
-          color: Colors.black,
+          color: Colors.black54,
         ),
       ),
       style: TextStyle(
         color: Colors.black,
       ),
+
+      // Validator is called when the start button is clicked
       validator: (String value) {
         if (value.isEmpty) {
-          return 'Please input a name';
+          return 'Please input a weight';
         }
         _patient.setPatientWeight(value);
         _patient.doItAll();
@@ -100,10 +101,12 @@ class _MyAppState extends State<MyApp> {
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             ListTile(
-              title: Text(title,
-                  style: TextStyle(
-                    fontSize: 24,
-                  )),
+              title: Text(
+                title,
+                style: TextStyle(
+                  fontSize: 24,
+                ),
+              ),
               subtitle: Text(text),
             ),
           ],
@@ -117,7 +120,7 @@ class _MyAppState extends State<MyApp> {
       minWidth: 150,
       height: 50,
       child: RaisedButton(
-        textColor: Colors.grey[300],
+        textColor: Colors.white,
         color: Colors.blueAccent,
         child: Text(
           "Start",
@@ -145,6 +148,7 @@ class _MyAppState extends State<MyApp> {
     // Patient Weight Input Field
     body.add(
       Padding(
+        // TODO find a way to do this not hardocded (fits phone, chrome, etc...)
         padding: const EdgeInsets.fromLTRB(150.0, 0.0, 150.0, 0.0),
         child: Form(
           key: _formKey, // Used for the validation step
@@ -170,23 +174,25 @@ class _MyAppState extends State<MyApp> {
           child: Text("Patient Weight: ${_patient.patientWeight}"),
         ),
       );
-      // Section 1 Tile
+      // Patient Needs Tile
+      String patientNeeds =
+          "\tCalories: ${_patient.caloricNeeds_min} - ${_patient.caloricNeeds_max} kcal/day";
+      patientNeeds +=
+          "\n\tProtein: ${_patient.proteinNeeds_min} - ${_patient.proteinNeeds_max} g/day";
+      patientNeeds +=
+          "\n\tAdjusted Calories: ${_patient.scaledCaloricNeeds_min} - ${_patient.scaledCaloricNeeds_max} kcal/day ";
+      patientNeeds +=
+          "\n\tCalorie Average: ${_patient.averageCaloricNeeds} kcal/day";
+      patientNeeds +=
+          "\n\tProtein Average: ${_patient.averageProteinRounded} (${_patient.averageProteinNeeds}) g/day";
       body.add(
         Padding(
           padding: const EdgeInsets.all(8.0),
-          child: answerCard("Section 1: ",
-              "\tCalories: ${_patient.caloricNeeds_min} - ${_patient.caloricNeeds_max} kcal/day\n\tProtein: ${_patient.proteinNeeds_min} - ${_patient.proteinNeeds_max} g/day\n\tAdjusted Calories: ${_patient.scaledCaloricNeeds_min} - ${_patient.scaledCaloricNeeds_max} kcal/day"),
+          child: answerCard("Patient Needs: ", patientNeeds),
         ),
       );
-      // Section 2 Tile
-      body.add(
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: answerCard("Section 2: ",
-              "\tCalorie Average: ${_patient.averageCaloricNeeds} kcal/day\n\tProtein Average: ${_patient.averageProteinRounded} (${_patient.averageProteinNeeds}) g/day"),
-        ),
-      );
-      // Section 3 Tile
+
+      // Section 3 Tile - likely will be cut out
       body.add(
         Padding(
           padding: const EdgeInsets.all(8.0),
@@ -312,6 +318,7 @@ class _MyAppState extends State<MyApp> {
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.bold,
+              color: Colors.black,
 //          decoration: TextDecoration.underline,
             ),
           ),
@@ -320,7 +327,7 @@ class _MyAppState extends State<MyApp> {
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.bold,
-//          decoration: TextDecoration.underline,
+              color: Colors.black,
             ),
           ),
         ],
@@ -336,35 +343,66 @@ class _MyAppState extends State<MyApp> {
           style: TextStyle(
             fontSize: 12,
             fontStyle: FontStyle.italic,
+            color: Colors.black,
           )),
     ));
   }
 
-//  Center getTableTileRowEntry_colored(String entryText) {
-//    //(int aaIdx, int lipIdx, int dwIdx) {
-//    var valueColor;
-//    double value = double.parse(entryText);
-//    if (value < (_patient.caloricNeeds_max) &&
-//        value > (_patient.caloricNeeds_min)) {
-//      valueColor = Colors.green;
-//    } else {
-//      valueColor = Colors.red;
-//    }
-//
-//    return Center(
-//      child: Padding(
-//        padding: const EdgeInsets.fromLTRB(0.0, 4.0, 0.0, 4.0),
-//        child: Text(
-//          entryText,
-//          style: TextStyle(
-//            fontSize: 12,
-//            fontStyle: FontStyle.italic,
-//            color: valueColor,
-//          ),
-//        ),
-//      ),
-//    );
-//  }
+  Center getTableTileRowHeader_colored(
+      String headerText1, String headerText2, bool isLipid) {
+    double value;
+    Color validValue;
+
+    // Lipid section
+    if (isLipid) {
+      if (headerText2 != "") {
+        value = double.parse(headerText2);
+        headerText2 = "$value g/kg/day";
+
+        if (value <= 1.0) {
+          validValue = Colors.green;
+        } else {
+          validValue = Colors.red;
+        }
+      } else {
+        validValue = Colors.white;
+      }
+
+      // CHO section
+    } else {
+      value = double.parse(headerText2);
+      headerText2 = "$value mg/kg/min";
+
+      if (value <= 5.0 && value >= 2.0) {
+        validValue = Colors.green;
+      } else {
+        validValue = Colors.red;
+      }
+    }
+
+    return Center(
+      child: Column(
+        children: [
+          Text(
+            headerText1,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+//          decoration: TextDecoration.underline,
+            ),
+          ),
+          Text(
+            "$headerText2",
+            style: TextStyle(
+              fontSize: 12,
+              color: validValue,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   Center getTableTileRowEntry_colored(int aaIdx, int lipIdx, int dwIdx) {
     // TODO add color to each percentage as well
@@ -401,22 +439,6 @@ class _MyAppState extends State<MyApp> {
                 color: valueColor,
               ),
             ),
-            Text(
-              "${_patient.getInfusionRate(aaIdx, lipIdx, dwIdx).toStringAsFixed(1)} mg/kg/min",
-              style: TextStyle(
-                fontSize: 12,
-                fontStyle: FontStyle.italic,
-                color: valueColor,
-              ),
-            ),
-            Text(
-              "${_patient.getLipidRatio(aaIdx, lipIdx, dwIdx).toStringAsFixed(1)} g/kg/day",
-              style: TextStyle(
-                fontSize: 12,
-                fontStyle: FontStyle.italic,
-                color: valueColor,
-              ),
-            ),
           ],
         ),
       ),
@@ -430,17 +452,44 @@ class _MyAppState extends State<MyApp> {
         children: [
           TableRow(
             children: [
-              //TODO dont hardcode numbers
-              getTableTileRowHeader(" ", " "),
-              getTableTileRowHeader("250ml @20%", "(Lipids)"),
-              getTableTileRowHeader("250ml @11%", "(Lipids)"),
-              getTableTileRowHeader("500ml @11%", "(Lipids)"),
+              Text(" "),
+              Text(" "),
+              Text(
+                "LIPIDS",
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
+              ),
+              Text(" "),
             ],
           ),
           TableRow(
             children: [
               //TODO dont hardcode numbers
-              getTableTileRowHeader("10% Concn", "(CHO)"),
+              getTableTileRowHeader_colored(" ", "", true),
+              getTableTileRowHeader_colored(
+                  "250ml @20%",
+                  "${_patient.getLipidRatio(index, 0, 0).toStringAsFixed(1)}",
+                  true),
+              getTableTileRowHeader_colored(
+                  "250ml @11%",
+                  "${_patient.getLipidRatio(index, 1, 0).toStringAsFixed(1)}",
+                  true),
+              getTableTileRowHeader_colored(
+                  "500ml @11%",
+                  "${_patient.getLipidRatio(index, 2, 0).toStringAsFixed(1)}",
+                  true),
+            ],
+          ),
+          TableRow(
+            children: [
+              //TODO dont hardcode numbers
+              getTableTileRowHeader_colored(
+                  "10% Concn",
+                  "${_patient.getInfusionRate(index, 0, 0).toStringAsFixed(1)}",
+                  false),
               getTableTileRowEntry_colored(index, 0, 0),
               getTableTileRowEntry_colored(index, 1, 0),
               getTableTileRowEntry_colored(index, 2, 0),
@@ -449,7 +498,10 @@ class _MyAppState extends State<MyApp> {
           TableRow(
             children: [
               //TODO dont hardcode numbers
-              getTableTileRowHeader("15% Concn", "(CHO)"),
+              getTableTileRowHeader_colored(
+                  "15% Concn",
+                  "${_patient.getInfusionRate(index, 0, 1).toStringAsFixed(1)}",
+                  false),
               getTableTileRowEntry_colored(index, 0, 1),
               getTableTileRowEntry_colored(index, 1, 1),
               getTableTileRowEntry_colored(index, 2, 1),
@@ -458,7 +510,10 @@ class _MyAppState extends State<MyApp> {
           TableRow(
             children: [
               //TODO dont hardcode numbers
-              getTableTileRowHeader("20% Concn", "(CHO)"),
+              getTableTileRowHeader_colored(
+                  "20% Concn",
+                  "${_patient.getInfusionRate(index, 0, 2).toStringAsFixed(1)}",
+                  false),
               getTableTileRowEntry_colored(index, 0, 2),
               getTableTileRowEntry_colored(index, 1, 2),
               getTableTileRowEntry_colored(index, 2, 2),
@@ -467,7 +522,10 @@ class _MyAppState extends State<MyApp> {
           TableRow(
             children: [
               //TODO dont hardcode numbers
-              getTableTileRowHeader("25% Concn", "(CHO)"),
+              getTableTileRowHeader_colored(
+                  "25% Concn",
+                  "${_patient.getInfusionRate(index, 0, 3).toStringAsFixed(1)}",
+                  false),
               getTableTileRowEntry_colored(index, 0, 3),
               getTableTileRowEntry_colored(index, 1, 3),
               getTableTileRowEntry_colored(index, 2, 3),
@@ -484,130 +542,145 @@ class _MyAppState extends State<MyApp> {
       for each amino acid concentration
     */
     // TODO Make collapsible?
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Card(
-        color: Colors.grey[200],
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-//          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              title: Text(
-                  "AA Concentration: ${aminoAcidConcentrations[index].toStringAsFixed(3)}",
-                  style: TextStyle(
-                    // TODO: Make uniform via function
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  )),
-            ),
-
-            // Table containing update volume, calories, protein, etc...
-            Padding(
-              padding: const EdgeInsets.fromLTRB(32.0, 0.0, 0.0, 10.0),
-              // https://medium.com/flutter-community/table-in-flutter-beyond-the-basics-8d31b022b451
-              child: Table(
-                /*
-                border: TableBorder(
-                  top: BorderSide(
-                    color: Colors.blueGrey,
-                    width: 2,
-                  ),
-                  bottom: BorderSide(
-                    color: Colors.blueGrey,
-                    width: 2,
-                  ),
-                  left: BorderSide(
-                    color: Colors.blueGrey,
-                    width: 2,
-                  ),
-                  right: BorderSide(
-                    color: Colors.blueGrey,
-                    width: 2,
-                  ),
-                ),
-                */ // Table Border
-                children: [
-                  TableRow(
-                    children: [
-                      getTableTileRowHeader("Solution Volume", "(ml)"),
-                      getTableTileRowHeader("Rounded Rate", "(ml/hour)"),
-                      getTableTileRowHeader("Updated Volume", "(/day?)"),
-                      getTableTileRowHeader('Protein', '(g/day)'),
-                      getTableTileRowHeader("Updated Calories", "kcal/day)"),
-                    ],
-                  ),
-                  TableRow(
-                    children: [
-                      getTableTileRowEntry(
-                          "${_patient.aminoAcidSolution[index].toStringAsFixed(1)}"),
-                      getTableTileRowEntry(
-                          "${_patient.hourlyRate[index].toStringAsFixed(1)}"),
-                      getTableTileRowEntry(
-                          "${_patient.updatedVolume[index].toStringAsFixed(1)}"),
-                      getTableTileRowEntry(
-                          "${_patient.updatedProtein[index].toStringAsFixed(1)}"),
-                      getTableTileRowEntry(
-                          "${_patient.updatedCalories[index].toStringAsFixed(1)}"),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(32.0, 0.0, 0.0, 10.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "Lipids",
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  // TODO make a for loop? Is this ever gonna be more than 3...?
-                  Text(//TODO use a RichText to bold the value?
-                      "\t${lipidVolume[0]}ml @${lipidConcentrations[0] * 100}% ILE: \t${_patient.calRemaining[index][0].toStringAsFixed(1)} kcal remaining for PN"),
-                  Text(
-                      "\t${lipidVolume[1]}ml @${lipidConcentrations[1] * 100}%* ILE: \t${_patient.calRemaining[index][1].toStringAsFixed(1)} kcal remaining for PN"),
-                  Text(
-                      "\t${lipidVolume[2]}ml @${lipidConcentrations[2] * 100}%* ILE: \t${_patient.calRemaining[index][2].toStringAsFixed(1)} kcal remaining for PN"),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(32.0, 0.0, 0.0, 10.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "CHO",
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Text(
-                      "\t${dwConcn[0] * 100}% Concn: ${_patient.dextroseProvided[index][0].toStringAsFixed(1)} kcal/day from CHO"),
-                  Text(
-                      "\t${dwConcn[1] * 100}% Concn: ${_patient.dextroseProvided[index][1].toStringAsFixed(1)} kcal/day from CHO"),
-                  Text(
-                      "\t${dwConcn[2] * 100}% Concn: ${_patient.dextroseProvided[index][2].toStringAsFixed(1)} kcal/day from CHO"),
-                  Text(
-                      "\t${dwConcn[3] * 100}% Concn: ${_patient.dextroseProvided[index][3].toStringAsFixed(1)} kcal/day from CHO"),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(32.0, 0.0, 0.0, 0.0),
-              child: Text(
-                "Updated Calorie Counts (P%,L%,C%):",
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-            ),
-            getUpdatedCalTable(index),
-          ],
+    return ExpansionTile(
+      title: Text(
+        "AA Concentration: ${aminoAcidConcentrations[index].toStringAsFixed(3)}",
+        style: TextStyle(
+          fontSize: 18,
+          fontWeight: FontWeight.bold,
         ),
       ),
+      children: [
+        ListTile(
+          subtitle: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+//          mainAxisSize: MainAxisSize.min,
+            children: [
+              // Table containing update volume, calories, protein, etc...
+              Padding(
+                padding: const EdgeInsets.fromLTRB(32.0, 0.0, 0.0, 10.0),
+                // https://medium.com/flutter-community/table-in-flutter-beyond-the-basics-8d31b022b451
+                child: Table(
+                  children: [
+                    TableRow(
+                      children: [
+                        getTableTileRowHeader("Solution Volume", "(ml)"),
+                        getTableTileRowHeader("Rounded Rate", "(ml/hour)"),
+                        getTableTileRowHeader("Updated Volume", "(/day?)"),
+                        getTableTileRowHeader('Protein', '(g/day)'),
+                        getTableTileRowHeader("Updated Calories", "kcal/day)"),
+                      ],
+                    ),
+                    TableRow(
+                      children: [
+                        getTableTileRowEntry(
+                            "${_patient.aminoAcidSolution[index].toStringAsFixed(1)}"),
+                        getTableTileRowEntry(
+                            "${_patient.hourlyRate[index].toStringAsFixed(1)}"),
+                        getTableTileRowEntry(
+                            "${_patient.updatedVolume[index].toStringAsFixed(1)}"),
+                        getTableTileRowEntry(
+                            "${_patient.updatedProtein[index].toStringAsFixed(1)}"),
+                        getTableTileRowEntry(
+                            "${_patient.updatedCalories[index].toStringAsFixed(1)}"),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(0.0, 32.0, 0.0, 32.0),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Lipids",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                          ),
+                        ),
+                        // TODO make a for loop? Is this ever gonna be more than 3...?
+                        Text(
+                          //TODO use a RichText to bold the value?
+                          "\t${lipidVolume[0]}ml @${lipidConcentrations[0] * 100}% ILE: \t${_patient.calRemaining[index][0].toStringAsFixed(1)} kcal remaining for PN",
+                          style: TextStyle(
+                            color: Colors.black,
+                          ),
+                        ),
+                        Text(
+                          "\t${lipidVolume[1]}ml @${lipidConcentrations[1] * 100}%* ILE: \t${_patient.calRemaining[index][1].toStringAsFixed(1)} kcal remaining for PN",
+                          style: TextStyle(
+                            color: Colors.black,
+                          ),
+                        ),
+                        Text(
+                          "\t${lipidVolume[2]}ml @${lipidConcentrations[2] * 100}%* ILE: \t${_patient.calRemaining[index][2].toStringAsFixed(1)} kcal remaining for PN",
+                          style: TextStyle(
+                            color: Colors.black,
+                          ),
+                        ),
+                      ],
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "CHO",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                          ),
+                        ),
+                        Text(
+                          "\t${dwConcn[0] * 100}% Concn: ${_patient.dextroseProvided[index][0].toStringAsFixed(1)} kcal/day from CHO",
+                          style: TextStyle(
+                            color: Colors.black,
+                          ),
+                        ),
+                        Text(
+                          "\t${dwConcn[1] * 100}% Concn: ${_patient.dextroseProvided[index][1].toStringAsFixed(1)} kcal/day from CHO",
+                          style: TextStyle(
+                            color: Colors.black,
+                          ),
+                        ),
+                        Text(
+                          "\t${dwConcn[2] * 100}% Concn: ${_patient.dextroseProvided[index][2].toStringAsFixed(1)} kcal/day from CHO",
+                          style: TextStyle(
+                            color: Colors.black,
+                          ),
+                        ),
+                        Text(
+                          "\t${dwConcn[3] * 100}% Concn: ${_patient.dextroseProvided[index][3].toStringAsFixed(1)} kcal/day from CHO",
+                          style: TextStyle(
+                            color: Colors.black,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+
+              Padding(
+                padding: const EdgeInsets.fromLTRB(32.0, 0.0, 0.0, 0.0),
+                child: Text(
+                  "Updated Calorie Counts:",
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
+                ),
+              ),
+              getUpdatedCalTable(index),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
