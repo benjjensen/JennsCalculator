@@ -1,28 +1,26 @@
-/*  Parameters used in Jenns thing */
+// Default setting parameters
+const double caloriesPerKg_lower = 25.0; // kcal / kg
+const double caloriesPerKg_upper = 30.0; // kcal / kg
 
-var caloriesPerKg_lower = 25.0; // kcal / kg
-var caloriesPerKg_upper = 30.0;
+const double proteinPerKg_lower = 1.3; // g protein / kg
+const double proteinPerKg_upper = 1.5; // g protein / kg
 
-var proteinPerKg_lower = 1.3; // g protein / kg
-var proteinPerKg_upper = 1.5;
+const double caloriesPerProtein = 4.0;
+const double kcalsPerGSugar = 3.4;
 
-var fluidRatio = 1.0; // ml / kcal
+const double fluidRatio = 1.0; // ml / kcal TODO i have no idea what this means
 
-var parenteralScalingFactor =
-    0.8; // Amount of calorie needs provided through parenteral nutrition (ASPEN/SCCM)
+double parenteralScalingFactor_ =
+0.8; // Amount of calorie needs to be provided through parenteral nutrition
 
-var aminoAcidConcentrations = [0.05, 0.06, 0.075];
+List<double> aminoAcidConcns_ = [0.05, 0.06, 0.075];
 
-var rateOfGiving =
-    24.0; // how many times a day do we give them stuff ////////////
-var portionRounding = 5.0; // What we round the dose to, in ml
+double rateOfGiving_ = 24.0; // how many times a day they receive a dose
+double portionRounding_ = 5.0; // what we round the dose to, in ml
 
-var caloriesPerProtein = 4.0;
+// Lipids
+List<double> lipidConcns_ = [0.2, 0.11, 0.11]; // kcals/mL
+List<double> lipidVolumes_ = [250, 250, 500]; // in mL
 
-// LIPIDS
-List<double> lipidConcentrations = [0.2, 0.11, 0.11]; // kcals / mL
-List<double> lipidVolume = [250, 250, 500]; // in mL
-
-// CHO
-List<double> dwConcn = [0.1, 0.15, 0.2, 0.25]; // D%W concentrations, g/ml ?
-double kcalsPerGSugar = 3.4; // kcal / g CHO
+// Dextrose (CHO)
+List<double> dwConcns_ = [0.1, 0.15, 0.2, 0.25]; // g/ml ?

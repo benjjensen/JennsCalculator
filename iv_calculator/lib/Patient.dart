@@ -1,44 +1,37 @@
-import 'Parameters.dart';
+import "Settings.dart";
+import "Parameters.dart";
 
 class Patient {
-  var patientWeight;
-  var caloricNeeds_min;
-  var caloricNeeds_max;
-  var proteinNeeds_min;
-  var proteinNeeds_max;
-  var scaledCaloricNeeds_min;
-  var scaledCaloricNeeds_max;
+  Settings settings;
+  double patientWeight;
+  double caloricNeeds_min;
+  double caloricNeeds_max;
+  double proteinNeeds_min;
+  double proteinNeeds_max;
+  double scaledCaloricNeeds_min;
+  double scaledCaloricNeeds_max;
 
-  var averageCaloricNeeds;
-  var averageProteinNeeds;
-  var averageProteinRounded;
+  double averageCaloricNeeds;
+  double averageProteinNeeds;
+  int averageProteinRounded;
 
-  List<double> aminoAcidSolution = [];
+  List<double> aminoAcidSlns = [];
+  List<double> hourlyRate = [];
+  List<double> updatedVolume = [];
+  List<double> updatedProtein = [];
+  List<double> updatedCalories = [];
 
-  var hourlyRate = [];
-  var updatedVolume = [];
-  var updatedProtein = [];
-  var updatedCalories = [];
+  Patient(Settings settings) : settings = settings;
 
-  // LIPIDS
-  var calRemaining = List.generate(
-      aminoAcidConcentrations.length, (i) => List(lipidVolume.length),
-      growable: false);
-
+  // Lipids
+  var calRemaining;
   List<double> calFromLipids = [];
 
   // CHO
-  var dextroseProvided = List.generate(
-      aminoAcidConcentrations.length, (i) => List(dwConcn.length),
-      growable: false);
+  var dextroseProvided;
 
-  // Recalculating kcals
-  //    #AA Concn x #Lipid Volume x #CHO Concn
-  var newCalVals = List.generate(
-      aminoAcidConcentrations.length,
-      (i) => List.generate(lipidVolume.length, (j) => List(dwConcn.length),
-          growable: false),
-      growable: false);
+  // Recalculating kcals - #AA Concn x #Lipid Volume x #CHO Concn
+  var newCalVals;
 
   void calculateNutrientNeeds() {
     caloricNeeds_min = caloriesPerKg_lower * patientWeight; // in kcal/day
@@ -48,84 +41,101 @@ class Patient {
     proteinNeeds_max = proteinPerKg_upper * patientWeight;
 
     scaledCaloricNeeds_min =
-        caloricNeeds_min * parenteralScalingFactor; // in kcal / day
-    scaledCaloricNeeds_max = caloricNeeds_max * parenteralScalingFactor;
+        caloricNeeds_min * settings.parenteralScalingFactor; // in kcal / day
+    scaledCaloricNeeds_max =
+        caloricNeeds_max * settings.parenteralScalingFactor;
 
     averageCaloricNeeds =
         (scaledCaloricNeeds_min + scaledCaloricNeeds_max) / 2.0;
     averageProteinNeeds = (proteinNeeds_min + proteinNeeds_max) / 2.0;
     averageProteinRounded = averageProteinNeeds.round();
-  }
 
-  void determineSolutionVolume() {
-    for (int i = 0; i < aminoAcidConcentrations.length; i++) {
-      aminoAcidSolution.add(averageProteinRounded / aminoAcidConcentrations[i]);
+    for (int i = 0; i < settings.aminoAcidConcns.length; i++) {
+      aminoAcidSlns.add(averageProteinRounded / settings.aminoAcidConcns[i]);
     }
   }
 
   void determineHourlyRate() {
-    for (int i = 0; i < aminoAcidConcentrations.length; i++) {
-      // Round to the nearest 5 for each concentration (divide by 5, round, multiply by 5 again)
-      hourlyRate.add(
-          ((aminoAcidSolution[i] / rateOfGiving) / portionRounding).round() *
-              portionRounding);
+    for (int i = 0; i < settings.aminoAcidConcns.length; i++) {
+      // Break down daily allotment into specified doses, and then round to the nearest specified volume (e.g., nearest 5)
+      hourlyRate.add(((aminoAcidSlns[i] / settings.rateOfGiving) /
+          settings.portionRounding)
+          .round() *
+          settings.portionRounding);
 
-      // Update volume with rounded values
-      updatedVolume.add(rateOfGiving * hourlyRate[i]);
+      // Update volume using rounded values
+      updatedVolume.add(settings.rateOfGiving * hourlyRate[i]);
 
-      // Update the total protein provided
-      updatedProtein.add(updatedVolume[i] * aminoAcidConcentrations[i]);
+      // Update the total protein provided based off of updated volume
+      updatedProtein.add(updatedVolume[i] * settings.aminoAcidConcns[i]);
 
-      // Update the calories provided
+      // Updated calories provided with updated protein count
       updatedCalories.add(updatedProtein[i] * caloriesPerProtein);
     }
   }
 
   void determineLipids() {
-    for (int i = 0; i < lipidVolume.length; i++) {
-      calFromLipids.add(lipidVolume[i] *
-          lipidConcentrations[i] *
-          10.0); // x10 to convert from g to calories (?)
+    calRemaining = List.generate(settings.aminoAcidConcns.length,
+            (i) => List(settings.lipidVolumes.length),
+        growable: false);
+
+    for (int i = 0; i < settings.lipidVolumes.length; i++) {
+      calFromLipids.add(settings.lipidVolumes[i] *
+          settings.lipidConcns[i] *
+          10.0); // x10 to convert from grams to calories (?)
     }
-    for (int j = 0; j < aminoAcidConcentrations.length; j++) {
-      for (int i = 0; i < lipidVolume.length; i++) {
-        calRemaining[j][i] =
-            averageCaloricNeeds - updatedCalories[j] - calFromLipids[i];
+
+    for (int i = 0; i < settings.aminoAcidConcns.length; i++) {
+      for (int j = 0; j < settings.lipidVolumes.length; j++) {
+        calRemaining[i][j] =
+            averageCaloricNeeds - updatedCalories[i] - calFromLipids[j];
       }
     }
   }
 
   void determineCHO() {
-    for (int i = 0; i < aminoAcidConcentrations.length; i++) {
-      for (int j = 0; j < dwConcn.length; j++) {
-        dextroseProvided[i][j] = updatedVolume[i] * dwConcn[j] * kcalsPerGSugar;
+    dextroseProvided = List.generate(
+        settings.aminoAcidConcns.length, (i) => List(settings.dwConcns.length),
+        growable: false);
+    for (int i = 0; i < settings.aminoAcidConcns.length; i++) {
+      for (int j = 0; j < settings.dwConcns.length; j++) {
+        dextroseProvided[i][j] =
+            updatedVolume[i] * settings.dwConcns[j] * kcalsPerGSugar;
       }
     }
   }
 
   void sumUpNewCalCount() {
-    for (int aa = 0; aa < aminoAcidConcentrations.length; aa++) {
-      for (int lipVol = 0; lipVol < lipidVolume.length; lipVol++) {
-        for (int dwCon = 0; dwCon < dwConcn.length; dwCon++) {
-          newCalVals[aa][lipVol][dwCon] = updatedCalories[aa] +
-              calFromLipids[lipVol] +
-              dextroseProvided[aa][dwCon];
+    //    #AA Concn x #Lipid Volume x #CHO Concn
+    newCalVals = List.generate(
+        settings.aminoAcidConcns.length,
+            (i) => List.generate(
+            settings.lipidVolumes.length, (j) => List(settings.dwConcns.length),
+            growable: false),
+        growable: false);
+
+    for (int aaIdx = 0; aaIdx < settings.aminoAcidConcns.length; aaIdx++) {
+      for (int lipIdx = 0; lipIdx < settings.lipidVolumes.length; lipIdx++) {
+        for (int dwIdx = 0; dwIdx < settings.dwConcns.length; dwIdx++) {
+          newCalVals[aaIdx][lipIdx][dwIdx] = updatedCalories[aaIdx] +
+              calFromLipids[lipIdx] +
+              dextroseProvided[aaIdx][dwIdx];
         }
       }
     }
   }
 
-  List<double> nutrientPercentage(int aa, int lipVol, int dwCon) {
-    /*  Returns the contribution of protein, lipids, and dextrose to overall
-       calorie count, by percentage (in that order)
+  List<double> nutrientPercentage(int aaIdx, int lipIdx, int dwIdx) {
+    /*
+        Returns the contribution of protein, lipids, and dextrose to
+      overall calorie count, by percentage (in that order)
      */
-    // TODO is this divided by the average or the actual?
     double percentCalFromProtein =
-        updatedCalories[aa] / newCalVals[aa][lipVol][dwCon];
+        updatedCalories[aaIdx] / newCalVals[aaIdx][lipIdx][dwIdx];
     double percentCalFromLipids =
-        calFromLipids[lipVol] / newCalVals[aa][lipVol][dwCon];
+        calFromLipids[lipIdx] / newCalVals[aaIdx][lipIdx][dwIdx];
     double percentCalFromCHO =
-        dextroseProvided[aa][dwCon] / newCalVals[aa][lipVol][dwCon];
+        dextroseProvided[aaIdx][dwIdx] / newCalVals[aaIdx][lipIdx][dwIdx];
 
     List<double> calorieBreakdown = [];
     calorieBreakdown.add(percentCalFromProtein);
@@ -136,41 +146,23 @@ class Patient {
   }
 
   double getInfusionRate(int aaIdx, int lipIdx, int dwIdx) {
-    double gramsCHO = dextroseProvided[aaIdx][dwIdx] /
-        kcalsPerGSugar; // Convert from calories back to grams CHO
-    double infusionRate = gramsCHO *
-        1000.0 /
-        (patientWeight *
-            1440.0); // grams -> mg, divided by weight, divided by minutes
+    // convert from calories back to grams CHO
+    double gramsCHO = dextroseProvided[aaIdx][dwIdx] / kcalsPerGSugar;
+    // grams -> mg, divided by weight, divided by minutes in day
+    double infusionRate = gramsCHO * 1000.0 / (patientWeight * 1440.0);
     return infusionRate; // in mg/kg/min
   }
 
   double getLipidRatio(int aaIdx, int lipIdx, int dwIdx) {
-    double gramsLipid = calFromLipids[lipIdx] / 10.0;
-    return (gramsLipid / patientWeight); // g/kg/day (less than 1)
+    double gramsLipid = calFromLipids[lipIdx] / 10.0; // convert back to grams
+    return (gramsLipid / patientWeight); // g/kg/day (less than 1, hopefully)
   }
 
   void doItAll() {
-    print("Doin it all");
-    aminoAcidSolution.clear();
-    hourlyRate.clear();
-    updatedVolume.clear();
-    updatedProtein.clear();
-    updatedCalories.clear();
-
     calculateNutrientNeeds();
-    determineSolutionVolume();
     determineHourlyRate();
     determineLipids();
     determineCHO();
     sumUpNewCalCount();
-  }
-
-  void setPatientWeight(String weight) {
-    patientWeight = double.parse(weight); // in kg
-  }
-
-  int getCalories() {
-    return caloricNeeds_min;
   }
 }

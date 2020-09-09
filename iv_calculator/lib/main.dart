@@ -1,38 +1,27 @@
-/* https://blog.solutelabs.com/flutter-for-web-how-to-deploy-a-flutter-web-app-c7d9db7ced2e
- Above was used for deploying to web. Note that for Part 2, step 2, you must remember to
- "git push origin gh-pages
-
- Pushing changes:
-    1) Push to github
-    2) On Firebase CLI thing:
-      a) flutter build web
-      b) flutter pub global run peanut:peanut
-      c) git push origin gh-pages
-    3) Wait like 2-3 min
-
-    (C:\Users\benjj\Downloads\firebase-tools-instant-win.exe)
- */
-
-/* Long Term TODO:
-  - Add in the non-parenteral
-  - Allow input of which lipids/CHO concn are available and cross out others
- */
+// TODO Color the percent breakdown in displayForm
 
 import 'package:flutter/material.dart';
 import 'Patient.dart';
-import "Parameters.dart";
+import 'Settings.dart';
+import 'DisplayForm.dart';
 
-void main() => runApp(MyApp());
-
-class MyApp extends StatefulWidget {
-  @override
-  _MyAppState createState() => _MyAppState();
+void main() {
+  runApp(IVCalculator());
 }
 
-class _MyAppState extends State<MyApp> {
-  final _formKey = GlobalKey<FormState>();
-  static var _patient = Patient();
-  var displayFlag = false;
+class IVCalculator extends StatefulWidget {
+  @override
+  _IVCalculatorState createState() => _IVCalculatorState();
+}
+
+class _IVCalculatorState extends State<IVCalculator> {
+  bool displayResultsFlag = false;
+  bool displaySettingsFlag = false;
+  bool displaySettingsErrorFlag =
+      false; // Flag used to signal display of error (e.g., lipid volumes and concentrations dont align
+  static Settings settings = Settings();
+  static Patient patient = Patient(settings);
+  static DisplayForm displayForm = DisplayForm(settings, patient);
 
   @override
   Widget build(BuildContext context) {
@@ -42,643 +31,356 @@ class _MyAppState extends State<MyApp> {
       ),
       home: Scaffold(
         appBar: AppBar(
-          title: Text("Jenn's Thing v1.1"),
+          title: Text("Parenteral IV Calculator: v1.2"),
           centerTitle: true,
         ),
         backgroundColor: Colors.white,
-        body: ListView(
-          children: [
-            Column(
-              children:
-                  getBody(), // Entry form, start button, and cards when relevant
-            ),
-          ],
+        body: getBody(),
+      ),
+    );
+  }
+
+  Widget weightInputField() {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Center(
+        child: Container(
+          constraints: BoxConstraints(maxWidth: 300),
+          child: TextField(
+            decoration: InputDecoration(
+                hintText: 'Enter Patient Weight', border: OutlineInputBorder()),
+            onSubmitted: (String text) {
+              setState(() {
+                patient.patientWeight = double.parse(text);
+                displayResultsFlag = true;
+                displaySettingsFlag = false;
+                patient.doItAll();
+              });
+            },
+          ),
         ),
       ),
     );
   }
 
-  Widget getWeight() {
-    /*
-      Entry form for gathering data from user (patient's weight)
-    */
-    Widget playerForm = TextFormField(
-      decoration: const InputDecoration(
-        hintText: 'Enter patient weight',
-        enabledBorder: UnderlineInputBorder(
-          borderSide: BorderSide(color: Colors.blueAccent),
-        ),
-        hintStyle: TextStyle(
-          color: Colors.black54,
-        ),
+  Widget settingsButton() {
+    return RaisedButton(
+      textColor: Colors.white,
+      color: Colors.blueAccent,
+      child: Text(
+        "Adjust Settings",
+        style: TextStyle(fontSize: 16),
       ),
-      style: TextStyle(
-        color: Colors.black,
-      ),
-
-      // Validator is called when the start button is clicked
-      validator: (String value) {
-        if (value.isEmpty) {
-          return 'Please input a weight';
-        }
-        _patient.setPatientWeight(value);
-        _patient.doItAll();
-        return null;
+      onPressed: () {
+        setState(() {
+          displayResultsFlag = false;
+          displaySettingsFlag = !displaySettingsFlag;
+        });
       },
     );
-    return Container(
-      child: playerForm,
-    );
   }
 
-  Widget answerCard(var title, var text) {
-    return Card(
-      color: Colors.grey[200],
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            ListTile(
-              title: Text(
-                title,
-                style: TextStyle(
-                  fontSize: 24,
-                ),
-              ),
-              subtitle: Text(text),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget startButton() {
-    return ButtonTheme(
-      minWidth: 150,
-      height: 50,
-      child: RaisedButton(
-        textColor: Colors.white,
-        color: Colors.blueAccent,
-        child: Text(
-          "Start",
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-        ),
-        shape: RoundedRectangleBorder(
-          side: BorderSide(
-            color: Colors.blue[800],
-            width: 1,
-          ),
-          borderRadius: BorderRadius.all(Radius.circular(30)),
-        ),
-        onPressed: () {
-          setState(() {
-            displayFlag = true;
-            _formKey.currentState.validate();
-          });
-        },
-      ),
-    );
-  }
-
-  List<Widget> getBody() {
-    List<Widget> body = [];
-    // Patient Weight Input Field
-    body.add(
-      Padding(
-        // TODO find a way to do this not hardocded (fits phone, chrome, etc...)
-        padding: const EdgeInsets.fromLTRB(150.0, 0.0, 150.0, 0.0),
-        child: Form(
-          key: _formKey, // Used for the validation step
-          child:
-              getWeight(), // Returns a TextFormField with the appropriate number of name fields
-        ),
-      ),
-    );
-    // Start button
-    body.add(
-      Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: startButton(),
-      ),
-    );
-
-    // After the patient weight has been added, display the results
-    if (displayFlag) {
-      // Display input weight
-      body.add(
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Text("Patient Weight: ${_patient.patientWeight}"),
-        ),
-      );
-      // Patient Needs Tile
-      String patientNeeds =
-          "\tCalories: ${_patient.caloricNeeds_min} - ${_patient.caloricNeeds_max} kcal/day";
-      patientNeeds +=
-          "\n\tProtein: ${_patient.proteinNeeds_min} - ${_patient.proteinNeeds_max} g/day";
-      patientNeeds +=
-          "\n\tAdjusted Calories: ${_patient.scaledCaloricNeeds_min} - ${_patient.scaledCaloricNeeds_max} kcal/day ";
-      patientNeeds +=
-          "\n\tCalorie Average: ${_patient.averageCaloricNeeds} kcal/day";
-      patientNeeds +=
-          "\n\tProtein Average: ${_patient.averageProteinRounded} (${_patient.averageProteinNeeds}) g/day";
-      body.add(
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: answerCard("Patient Needs: ", patientNeeds),
-        ),
-      );
-
-      // Section 3 Tile - likely will be cut out
-      body.add(
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Card(
-            color: Colors.grey[200],
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  ListTile(
-                    title: Text("Section 3 (likely will be cut out)",
-                        style: TextStyle(
-                          fontSize: 24,
-                        )),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(32.0, 0.0, 0.0, 0.0),
-                    child: Table(////////////// Make a for loop here?
-                        children: [
-                      TableRow(children: [
-                        Text(
-                          "AA Concentration (%)",
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Text(
-                          "Solution Volume (ml)",
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Text(
-                          "Rounded Rate (ml/hour)",
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Text(
-                          "Updated Volume (l/day)??",
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Text(
-                          "Updated Protein (g/day)",
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Text(
-                          "Updated Calories (kcal/day)",
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ]),
-                      // TODO Make this a for loop in case more than 3
-                      TableRow(children: [
-                        Text("${aminoAcidConcentrations[0]}"),
-                        Text(
-                            "${_patient.aminoAcidSolution[0].toStringAsFixed(1)}"),
-                        Text("${_patient.hourlyRate[0].toStringAsFixed(1)}"),
-                        Text("${_patient.updatedVolume[0].toStringAsFixed(1)}"),
-                        Text(
-                            "${_patient.updatedProtein[0].toStringAsFixed(1)}"),
-                        Text(
-                            "${_patient.updatedCalories[0].toStringAsFixed(1)}"),
-                      ]),
-                      TableRow(children: [
-                        Text("${aminoAcidConcentrations[1]}"),
-                        Text(
-                            "${_patient.aminoAcidSolution[1].toStringAsFixed(1)}"),
-                        Text("${_patient.hourlyRate[1].toStringAsFixed(1)}"),
-                        Text("${_patient.updatedVolume[1].toStringAsFixed(1)}"),
-                        Text(
-                            "${_patient.updatedProtein[1].toStringAsFixed(1)}"),
-                        Text(
-                            "${_patient.updatedCalories[1].toStringAsFixed(1)}"),
-                      ]),
-                      TableRow(children: [
-                        Text("${aminoAcidConcentrations[2]}"),
-                        Text(
-                            "${_patient.aminoAcidSolution[2].toStringAsFixed(1)}"),
-                        Text("${_patient.hourlyRate[2].toStringAsFixed(1)}"),
-                        Text("${_patient.updatedVolume[2].toStringAsFixed(1)}"),
-                        Text(
-                            "${_patient.updatedProtein[2].toStringAsFixed(1)}"),
-                        Text(
-                            "${_patient.updatedCalories[2].toStringAsFixed(1)}"),
-                      ]),
-                    ]),
-                  )
-                ],
-              ),
-            ),
-          ),
-        ),
-      );
-
-      // Add in amino acid (AA) concentrations
-      for (int i = 0; i < aminoAcidConcentrations.length; i++) {
-        body.add(getTableTile(i));
-      }
-    }
-    return body;
-  }
-
-  Center getTableTileRowHeader(String headerText1, String headerText2) {
-    return Center(
-      child: Column(
-        children: [
-          Text(
-            headerText1,
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
-//          decoration: TextDecoration.underline,
-            ),
-          ),
-          Text(
-            headerText2,
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Center getTableTileRowEntry(String entryText) {
-    return Center(
-        child: Padding(
-      padding: const EdgeInsets.fromLTRB(0.0, 4.0, 0.0, 4.0),
-      child: Text(entryText,
-          style: TextStyle(
-            fontSize: 12,
-            fontStyle: FontStyle.italic,
-            color: Colors.black,
-          )),
-    ));
-  }
-
-  Center getTableTileRowHeader_colored(
-      String headerText1, String headerText2, bool isLipid) {
-    double value;
-    Color validValue;
-
-    // Lipid section
-    if (isLipid) {
-      if (headerText2 != "") {
-        value = double.parse(headerText2);
-        headerText2 = "$value g/kg/day";
-
-        if (value <= 1.0) {
-          validValue = Colors.green;
-        } else {
-          validValue = Colors.red;
-        }
-      } else {
-        validValue = Colors.white;
-      }
-
-      // CHO section
-    } else {
-      value = double.parse(headerText2);
-      headerText2 = "$value mg/kg/min";
-
-      if (value <= 5.0 && value >= 2.0) {
-        validValue = Colors.green;
-      } else {
-        validValue = Colors.red;
-      }
-    }
-
-    return Center(
-      child: Column(
-        children: [
-          Text(
-            headerText1,
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
-//          decoration: TextDecoration.underline,
-            ),
-          ),
-          Text(
-            "$headerText2",
-            style: TextStyle(
-              fontSize: 12,
-              color: validValue,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Center getTableTileRowEntry_colored(int aaIdx, int lipIdx, int dwIdx) {
-    // TODO add color to each percentage as well
-    var valueColor;
-    double value = _patient.newCalVals[aaIdx][lipIdx][dwIdx];
-    if (value < (_patient.caloricNeeds_max) &&
-        value > (_patient.caloricNeeds_min)) {
-      valueColor = Colors.green;
-    } else {
-      valueColor = Colors.red;
-    }
-
-    List<double> breakdown = _patient.nutrientPercentage(aaIdx, lipIdx, dwIdx);
-
-    return Center(
-      //TODO see if you can make units display when hovering
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(0.0, 6.0, 0.0, 6.0),
-        child: Column(
-          children: [
-            Text(
-              "${value.toStringAsFixed(1)}",
-              style: TextStyle(
-                fontSize: 12,
-                fontStyle: FontStyle.italic,
-                color: valueColor,
-              ),
-            ),
-            Text(
-              "(${(100 * breakdown[0]).toStringAsFixed(1)}%, ${(100 * breakdown[1]).toStringAsFixed(1)}%, ${(100 * breakdown[2]).toStringAsFixed(1)}%)",
-              style: TextStyle(
-                fontSize: 12,
-                fontStyle: FontStyle.italic,
-                color: valueColor,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Padding getUpdatedCalTable(int index) {
+  Widget settingsInputField(
+      // TODO note about hitting enter/button (changed instead of submitted? problems for arrays?)
+      String fieldText,
+      String hintText,
+      Function callbackAction) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(32.0, 0.0, 0.0, 10.0),
-      child: Table(
-        children: [
-          TableRow(
-            children: [
-              Text(" "),
-              Text(" "),
-              Text(
-                "LIPIDS",
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
+      // TODO start using controller lists?
+      padding: const EdgeInsets.fromLTRB(0, 2.0, 0, 2.0),
+      child: Container(
+        constraints: BoxConstraints(maxWidth: 800),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(fieldText),
+            Container(
+              constraints: BoxConstraints(maxWidth: 300),
+              child: TextField(
+                cursorColor: Colors.amber,
+                decoration: InputDecoration.collapsed(
+                  hintText: hintText,
+//                  hintStyle: TextStyle(
+//                    color: Colors.blueAccent.withOpacity(0.5),
+//                  ),
                 ),
+                onSubmitted: (String text) {
+                  setState(() {
+                    callbackAction(text);
+                  });
+                },
               ),
-              Text(" "),
-            ],
-          ),
-          TableRow(
-            children: [
-              //TODO dont hardcode numbers
-              getTableTileRowHeader_colored(" ", "", true),
-              getTableTileRowHeader_colored(
-                  "250ml @20%",
-                  "${_patient.getLipidRatio(index, 0, 0).toStringAsFixed(1)}",
-                  true),
-              getTableTileRowHeader_colored(
-                  "250ml @11%",
-                  "${_patient.getLipidRatio(index, 1, 0).toStringAsFixed(1)}",
-                  true),
-              getTableTileRowHeader_colored(
-                  "500ml @11%",
-                  "${_patient.getLipidRatio(index, 2, 0).toStringAsFixed(1)}",
-                  true),
-            ],
-          ),
-          TableRow(
-            children: [
-              //TODO dont hardcode numbers
-              getTableTileRowHeader_colored(
-                  "10% Concn",
-                  "${_patient.getInfusionRate(index, 0, 0).toStringAsFixed(1)}",
-                  false),
-              getTableTileRowEntry_colored(index, 0, 0),
-              getTableTileRowEntry_colored(index, 1, 0),
-              getTableTileRowEntry_colored(index, 2, 0),
-            ],
-          ),
-          TableRow(
-            children: [
-              //TODO dont hardcode numbers
-              getTableTileRowHeader_colored(
-                  "15% Concn",
-                  "${_patient.getInfusionRate(index, 0, 1).toStringAsFixed(1)}",
-                  false),
-              getTableTileRowEntry_colored(index, 0, 1),
-              getTableTileRowEntry_colored(index, 1, 1),
-              getTableTileRowEntry_colored(index, 2, 1),
-            ],
-          ),
-          TableRow(
-            children: [
-              //TODO dont hardcode numbers
-              getTableTileRowHeader_colored(
-                  "20% Concn",
-                  "${_patient.getInfusionRate(index, 0, 2).toStringAsFixed(1)}",
-                  false),
-              getTableTileRowEntry_colored(index, 0, 2),
-              getTableTileRowEntry_colored(index, 1, 2),
-              getTableTileRowEntry_colored(index, 2, 2),
-            ],
-          ),
-          TableRow(
-            children: [
-              //TODO dont hardcode numbers
-              getTableTileRowHeader_colored(
-                  "25% Concn",
-                  "${_patient.getInfusionRate(index, 0, 3).toStringAsFixed(1)}",
-                  false),
-              getTableTileRowEntry_colored(index, 0, 3),
-              getTableTileRowEntry_colored(index, 1, 3),
-              getTableTileRowEntry_colored(index, 2, 3),
-            ],
-          ),
-        ],
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  Widget getTableTile(int index) {
+  Widget getErrorMessage() {
+    // Displays an error message if there is a problem in setting settings
+    if (displaySettingsErrorFlag) {
+      return Center(
+          child: Container(
+              color: Colors.red,
+              child: Column(
+                children: [
+                  Text(" "),
+                  Text(
+                    "ERROR",
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Text(
+                      "The amount of comma-seperated values in the 'Lipid Concentrations' and 'Lipid Volumes' fields must match!",
+                      style: TextStyle(fontSize: 14)),
+                  Text(" "),
+                ],
+              )));
+    } else {
+      return Text(" ");
+    }
+  }
+
+  Widget settingsInputForm() {
     /*
-        Used to display the updated volume, protein, and calories
-      for each amino acid concentration
+      Form containing multiple settingInputField s
+      Used to update settings
     */
-    // TODO Make collapsible?
-    return ExpansionTile(
-      title: Text(
-        "AA Concentration: ${aminoAcidConcentrations[index].toStringAsFixed(3)}",
-        style: TextStyle(
-          fontSize: 18,
-          fontWeight: FontWeight.bold,
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Center(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // TODO could i shorten the name and have a full name with hovering over?
+            // TODO some sort of validation (e.g., for lipid fields)
+            settingsInputField(
+                'Amount of calories to be provided through parenteral IV:',
+                '${settings.parenteralScalingFactor}', (String text) {
+              settings.parenteralScalingFactor = double.parse(text);
+            }),
+            settingsInputField(
+              "Rate of Giving (times per day):",
+              '${settings.rateOfGiving}',
+              (String text) {
+                settings.rateOfGiving = double.parse(text);
+              },
+            ),
+            settingsInputField(
+                'Amino Acid Concentrations (seperate with commas):',
+                '${settings.aminoAcidConcns}'
+                    .substring(1, '${settings.aminoAcidConcns}'.length - 1),
+                (String text) {
+              List<double> aminoAcidConcns = [];
+              List<String> inputList = text.split(','); // split input by commas
+              for (int i = 0; i < inputList.length; i++) {
+                aminoAcidConcns.add(double.parse(inputList[i]));
+              }
+              settings.aminoAcidConcns = aminoAcidConcns;
+            }),
+            settingsInputField(
+                'Lipid concentrations (in kcals/ml, seperate with commas):',
+                '${settings.lipidConcns}'.substring(
+                    // trim off brackets for clarity
+                    1,
+                    '${settings.lipidConcns}'.length - 1), (String text) {
+              List<double> lipidConcns = [];
+              List<String> inputList = text.split(',');
+              for (int i = 0; i < inputList.length; i++) {
+                lipidConcns.add(double.parse(inputList[i]));
+              }
+              settings.lipidConcns = lipidConcns;
+            }),
+            settingsInputField(
+                // TODO is this pair format too confusing? ask Jenn
+                'Lipid volumes (in mL, be sure to match up with concentrations above):',
+                '${settings.lipidVolumes}'.substring(
+                    1, '${settings.lipidVolumes}'.length - 1), (String text) {
+              List<double> lipidVolumes = [];
+              List<String> inputList = text.split(',');
+              for (int i = 0; i < inputList.length; i++) {
+                lipidVolumes.add(double.parse(inputList[i]));
+              }
+              settings.lipidVolumes = lipidVolumes;
+            }),
+            settingsInputField(
+                'CHO Concentrations (in g/mL?, seperate with commas)',
+                '${settings.dwConcns}'.substring(
+                    1, '${settings.dwConcns}'.length - 1), (String text) {
+              List<double> dwConcns = [];
+              List<String> inputList = text.split(',');
+              for (int i = 0; i < inputList.length; i++) {
+                dwConcns.add(double.parse(inputList[i]));
+              }
+              settings.dwConcns = dwConcns;
+            }),
+            // Add in a Reset to Default button
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                RaisedButton(
+                  textColor: Colors.blueAccent,
+//              color: Colors.blueAccent,
+                  child: Text(
+                    "Reset to Default",
+                    style: TextStyle(fontSize: 12),
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      settings.setToDefaults();
+                      displaySettingsFlag =
+                          false; // TODO is there a better way to refresh the screen?
+                    });
+                  },
+                ),
+                SizedBox(
+                  width: 30,
+                ),
+                RaisedButton(
+                  textColor: Colors.blueAccent,
+                  child: Text(
+                    "Close Settings",
+                    style: TextStyle(fontSize: 12),
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      if (settings.lipidConcns.length !=
+                          settings.lipidVolumes.length) {
+                        displaySettingsErrorFlag = true;
+                      } else {
+                        displaySettingsFlag = false;
+                        displaySettingsErrorFlag = false;
+                      }
+                    });
+                  },
+                ),
+              ],
+            ),
+            getErrorMessage(),
+          ],
         ),
       ),
-      children: [
-        ListTile(
-          subtitle: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-//          mainAxisSize: MainAxisSize.min,
-            children: [
-              // Table containing update volume, calories, protein, etc...
-              Padding(
-                padding: const EdgeInsets.fromLTRB(32.0, 0.0, 0.0, 10.0),
-                // https://medium.com/flutter-community/table-in-flutter-beyond-the-basics-8d31b022b451
-                child: Table(
-                  children: [
-                    TableRow(
-                      children: [
-                        getTableTileRowHeader("Solution Volume", "(ml)"),
-                        getTableTileRowHeader("Rounded Rate", "(ml/hour)"),
-                        getTableTileRowHeader("Updated Volume", "(/day?)"),
-                        getTableTileRowHeader('Protein', '(g/day)'),
-                        getTableTileRowHeader("Updated Calories", "kcal/day)"),
-                      ],
-                    ),
-                    TableRow(
-                      children: [
-                        getTableTileRowEntry(
-                            "${_patient.aminoAcidSolution[index].toStringAsFixed(1)}"),
-                        getTableTileRowEntry(
-                            "${_patient.hourlyRate[index].toStringAsFixed(1)}"),
-                        getTableTileRowEntry(
-                            "${_patient.updatedVolume[index].toStringAsFixed(1)}"),
-                        getTableTileRowEntry(
-                            "${_patient.updatedProtein[index].toStringAsFixed(1)}"),
-                        getTableTileRowEntry(
-                            "${_patient.updatedCalories[index].toStringAsFixed(1)}"),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(0.0, 32.0, 0.0, 32.0),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          "Lipids",
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black,
-                          ),
-                        ),
-                        // TODO make a for loop? Is this ever gonna be more than 3...?
-                        Text(
-                          //TODO use a RichText to bold the value?
-                          "\t${lipidVolume[0]}ml @${lipidConcentrations[0] * 100}% ILE: \t${_patient.calRemaining[index][0].toStringAsFixed(1)} kcal remaining for PN",
-                          style: TextStyle(
-                            color: Colors.black,
-                          ),
-                        ),
-                        Text(
-                          "\t${lipidVolume[1]}ml @${lipidConcentrations[1] * 100}%* ILE: \t${_patient.calRemaining[index][1].toStringAsFixed(1)} kcal remaining for PN",
-                          style: TextStyle(
-                            color: Colors.black,
-                          ),
-                        ),
-                        Text(
-                          "\t${lipidVolume[2]}ml @${lipidConcentrations[2] * 100}%* ILE: \t${_patient.calRemaining[index][2].toStringAsFixed(1)} kcal remaining for PN",
-                          style: TextStyle(
-                            color: Colors.black,
-                          ),
-                        ),
-                      ],
-                    ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          "CHO",
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black,
-                          ),
-                        ),
-                        Text(
-                          "\t${dwConcn[0] * 100}% Concn: ${_patient.dextroseProvided[index][0].toStringAsFixed(1)} kcal/day from CHO",
-                          style: TextStyle(
-                            color: Colors.black,
-                          ),
-                        ),
-                        Text(
-                          "\t${dwConcn[1] * 100}% Concn: ${_patient.dextroseProvided[index][1].toStringAsFixed(1)} kcal/day from CHO",
-                          style: TextStyle(
-                            color: Colors.black,
-                          ),
-                        ),
-                        Text(
-                          "\t${dwConcn[2] * 100}% Concn: ${_patient.dextroseProvided[index][2].toStringAsFixed(1)} kcal/day from CHO",
-                          style: TextStyle(
-                            color: Colors.black,
-                          ),
-                        ),
-                        Text(
-                          "\t${dwConcn[3] * 100}% Concn: ${_patient.dextroseProvided[index][3].toStringAsFixed(1)} kcal/day from CHO",
-                          style: TextStyle(
-                            color: Colors.black,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
+    );
+  }
 
-              Padding(
-                padding: const EdgeInsets.fromLTRB(32.0, 0.0, 0.0, 0.0),
-                child: Text(
-                  "Updated Calorie Counts:",
+  Widget patientNeedsTile() {
+    return Container(
+      constraints: BoxConstraints(maxWidth: 1000), // TODO do i want this?
+      child: Card(
+        color: Colors.grey[200],
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                title: Text(
+                  "Summary of Patient Needs",
                   style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
+                    fontSize: 24,
+                  ),
+                ),
+                subtitle: Padding(
+                  padding: const EdgeInsets.fromLTRB(16.0, 0.0, 0.0, 0.0),
+                  child: RichText(
+                    // TODO: leave untouched? bold/color the amount? the category?
+                    text: TextSpan(
+                      style: TextStyle(
+                        color: Colors.black,
+                      ),
+                      children: <TextSpan>[
+                        TextSpan(
+                            text: 'Calories: ',
+                            style: TextStyle(fontWeight: FontWeight.bold)),
+                        TextSpan(
+                            text:
+                                '${patient.caloricNeeds_min} - ${patient.caloricNeeds_max} kcalories / day'),
+                        TextSpan(
+                            text: '\nProtein: ',
+                            style: TextStyle(fontWeight: FontWeight.bold)),
+                        TextSpan(
+                          text:
+                              '${patient.proteinNeeds_min.toStringAsFixed(1)} - ${patient.proteinNeeds_max.toStringAsFixed(1)}',
+                        ),
+                        TextSpan(text: ' grams / day'),
+                        TextSpan(text: '\nAdjusted Calories: '),
+                        TextSpan(
+                            text:
+                                '${patient.scaledCaloricNeeds_min} - ${patient.scaledCaloricNeeds_max}',
+                            style: TextStyle(fontWeight: FontWeight.bold)),
+                        TextSpan(text: ' kcalories/day'),
+                        TextSpan(text: '\nCalorie Average: '),
+                        TextSpan(
+                            text: '${patient.averageCaloricNeeds}',
+                            style: TextStyle(fontWeight: FontWeight.bold)),
+                        TextSpan(text: ' kcalories / day'),
+                        TextSpan(
+                            text:
+                                '\nProtein Average: ${patient.averageProteinRounded} (${patient.averageProteinNeeds.toStringAsFixed(1)}) grams / day')
+                      ],
+                    ),
                   ),
                 ),
               ),
-              getUpdatedCalTable(index),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget getBody() {
+    List<Widget> body = [];
+    // Always display the patient weight form + buttons
+    body.add(weightInputField());
+    body.add(settingsButton());
+    if (displaySettingsFlag) {
+      body.add(
+        Padding(
+          padding: const EdgeInsets.fromLTRB(0.0, 8.0, 0.0, 0.0),
+          child: Text(
+            "Settings",
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+      );
+      body.add(Padding(
+        padding: const EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 4.0),
+        child:
+            Text('(Note, you must hit \'Enter\' after each field you update)'),
+      ));
+      body.add(settingsInputForm());
+    } else if (displayResultsFlag) {
+      body.add(
+        Text(
+          "Results",
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      );
+      body.add(patientNeedsTile());
+      for (int i = 0; i < settings.aminoAcidConcns.length; i++) {
+        body.add(displayForm.getAminoAcidTile(i));
+      }
+      //TODO added this in to enable more scrolling... probably could find a better way
+      body.add(Container(
+        constraints: BoxConstraints(minHeight: 1000),
+      ));
+    }
+    return ListView(
+      children: [
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: body,
         ),
       ],
     );
