@@ -1,6 +1,6 @@
 // Default setting parameters
-const double caloriesPerKg_lower = 25.0; // kcal / kg
-const double caloriesPerKg_upper = 30.0; // kcal / kg
+const double caloriesPerKg_lower_ = 25.0; // kcal / kg
+const double caloriesPerKg_upper_ = 30.0; // kcal / kg
 
 const double proteinPerKg_lower = 1.3; // g protein / kg
 const double proteinPerKg_upper = 1.5; // g protein / kg
@@ -11,7 +11,7 @@ const double kcalsPerGSugar = 3.4;
 const double fluidRatio = 1.0; // ml / kcal TODO i have no idea what this means
 
 double parenteralScalingFactor_ =
-0.8; // Amount of calorie needs to be provided through parenteral nutrition
+    0.8; // Amount of calorie needs to be provided through parenteral nutrition
 
 List<double> aminoAcidConcns_ = [0.05, 0.06, 0.075];
 

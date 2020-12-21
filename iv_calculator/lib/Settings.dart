@@ -12,6 +12,9 @@ class Settings {
 
   List<double> dwConcns = [];
 
+  double caloriesPerKg_lower;
+  double caloriesPerKg_upper;
+
   Settings() {
     setToDefaults();
   }
@@ -28,5 +31,7 @@ class Settings {
     lipidVolumes = lipidVolumes_;
 //    dwConcns.clear();
     dwConcns = dwConcns_;
+    caloriesPerKg_lower = caloriesPerKg_lower_;
+    caloriesPerKg_upper = caloriesPerKg_upper_;
   }
 }
