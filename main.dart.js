@@ -44982,7 +44982,7 @@ s.r=$.a81}}
 F.oY.prototype={
 aM:function(){return new F.CL(C.o)}}
 F.CL.prototype={
-R:function(a){var s=null,r=X.a_j(s,C.ea),q=L.aG("Parenteral IV Calculator: v1.2",s,s,s,s,s)
+R:function(a){var s=null,r=X.a_j(s,C.ea),q=L.aG("Parenteral IV Calculator: v1.3",s,s,s,s,s)
 return new S.pq(new M.qz(new E.nN(q,!0,new P.ae(1/0,56),s),this.CW(),C.k,s),r,s)},
 TR:function(){var s=null
 return new T.bm(C.bm,new T.bH(C.A,s,s,M.dQ(s,Z.a_f(s,L.Zf(s,new F.ey(4,C.iA,C.o5),s,s,s,s,s,!0,s,s,s,s,s,s,s,C.iS,s,s,s,!0,s,s,s,s,s,"Enter Patient Weight",s,s,!1,s,s,s,s,s,s,s,s,s,s,s,s,s,s),new F.RR(this)),s,new S.a7(0,300,0,1/0),s,s,s,s,s),s),s)},
