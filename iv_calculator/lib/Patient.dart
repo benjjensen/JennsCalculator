@@ -59,8 +59,8 @@ class Patient {
     for (int i = 0; i < settings.aminoAcidConcns.length; i++) {
       // Break down daily allotment into specified doses, and then round to the nearest specified volume (e.g., nearest 5)
       hourlyRate.add(((aminoAcidSlns[i] / settings.rateOfGiving) /
-          settings.portionRounding)
-          .round() *
+                  settings.portionRounding)
+              .round() *
           settings.portionRounding);
 
       // Update volume using rounded values
@@ -76,7 +76,7 @@ class Patient {
 
   void determineLipids() {
     calRemaining = List.generate(settings.aminoAcidConcns.length,
-            (i) => List(settings.lipidVolumes.length),
+        (i) => List(settings.lipidVolumes.length),
         growable: false);
 
     for (int i = 0; i < settings.lipidVolumes.length; i++) {
@@ -109,7 +109,7 @@ class Patient {
     //    #AA Concn x #Lipid Volume x #CHO Concn
     newCalVals = List.generate(
         settings.aminoAcidConcns.length,
-            (i) => List.generate(
+        (i) => List.generate(
             settings.lipidVolumes.length, (j) => List(settings.dwConcns.length),
             growable: false),
         growable: false);
