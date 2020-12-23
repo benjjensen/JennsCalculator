@@ -1,4 +1,16 @@
 // TODO Color the percent breakdown in displayForm
+/* https://blog.solutelabs.com/flutter-for-web-how-to-deploy-a-flutter-web-app-c7d9db7ced2e
+ Above was used for deploying to web. Note that for Part 2, step 2, you must remember to
+ "git push origin gh-pages
+ Pushing changes:
+    1) Push to github
+    2) On Firebase CLI thing:
+      a) flutter build web
+      b) flutter pub global run peanut:peanut
+      c) git push origin gh-pages
+    3) Wait like 2-3 min
+    (C:\Users\benjj\Downloads\firebase-tools-instant-win.exe)
+*/
 
 import 'package:flutter/material.dart';
 import 'Patient.dart';
@@ -157,6 +169,18 @@ class _IVCalculatorState extends State<IVCalculator> {
           children: [
             // TODO could i shorten the name and have a full name with hovering over?
             // TODO some sort of validation (e.g., for lipid fields)
+            settingsInputField(
+                'Amount of calories per kg (lower and upper values, seperate with commas)',
+                '${settings.caloriesPerKg_lower}, ${settings.caloriesPerKg_upper}',
+                (String text) {
+              List<double> calsPerKg = [];
+              List<String> inputList = text.split(','); // split input by commas
+              for (int i = 0; i < inputList.length; i++) {
+                calsPerKg.add(double.parse(inputList[i]));
+              }
+              settings.caloriesPerKg_lower = calsPerKg[0];
+              settings.caloriesPerKg_upper = calsPerKg[1];
+            }),
             settingsInputField(
                 'Amount of calories to be provided through parenteral IV:',
                 '${settings.parenteralScalingFactor}', (String text) {

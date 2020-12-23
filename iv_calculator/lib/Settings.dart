@@ -7,6 +7,9 @@ class Settings {
   double rateOfGiving;
   double portionRounding;
 
+  double caloriesPerKg_lower;
+  double caloriesPerKg_upper;
+
   List<double> lipidConcns = [];
   List<double> lipidVolumes = [];
 
@@ -28,5 +31,7 @@ class Settings {
     lipidVolumes = lipidVolumes_;
 //    dwConcns.clear();
     dwConcns = dwConcns_;
+    caloriesPerKg_lower = caloriesPerKg_lower_;
+    caloriesPerKg_upper = caloriesPerKg_upper_;
   }
 }

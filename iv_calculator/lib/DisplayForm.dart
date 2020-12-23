@@ -1,16 +1,3 @@
-/* https://blog.solutelabs.com/flutter-for-web-how-to-deploy-a-flutter-web-app-c7d9db7ced2e
- Above was used for deploying to web. Note that for Part 2, step 2, you must remember to
- "git push origin gh-pages
- Pushing changes:
-    1) Push to github
-    2) On Firebase CLI thing:
-      a) flutter build web
-      b) flutter pub global run peanut:peanut
-      c) git push origin gh-pages
-    3) Wait like 2-3 min
-    (C:\Users\benjj\Downloads\firebase-tools-instant-win.exe)
-*/
-
 import 'package:flutter/material.dart';
 import 'Patient.dart';
 import 'Settings.dart';

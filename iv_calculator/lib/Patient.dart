@@ -34,8 +34,9 @@ class Patient {
   var newCalVals;
 
   void calculateNutrientNeeds() {
-    caloricNeeds_min = caloriesPerKg_lower * patientWeight; // in kcal/day
-    caloricNeeds_max = caloriesPerKg_upper * patientWeight;
+    caloricNeeds_min =
+        settings.caloriesPerKg_lower * patientWeight; // in kcal/day
+    caloricNeeds_max = settings.caloriesPerKg_upper * patientWeight;
 
     proteinNeeds_min = proteinPerKg_lower * patientWeight; // in g / day
     proteinNeeds_max = proteinPerKg_upper * patientWeight;

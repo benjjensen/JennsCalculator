@@ -1,6 +1,6 @@
 // Default setting parameters
-const double caloriesPerKg_lower = 25.0; // kcal / kg
-const double caloriesPerKg_upper = 30.0; // kcal / kg
+const double caloriesPerKg_lower_ = 25.0; // kcal / kg
+const double caloriesPerKg_upper_ = 30.0; // kcal / kg
 
 const double proteinPerKg_lower = 1.3; // g protein / kg
 const double proteinPerKg_upper = 1.5; // g protein / kg
